@@ -11,10 +11,10 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class ListAdapter(
-    private val dataList: ArrayList<Animal>,
+    private val dataList: MutableList<Animal>,
 ) : RecyclerView.Adapter<ListAdapter.ViewHolder>(), Filterable {
 
-    var filterList: ArrayList<Animal> = ArrayList()
+    var filterList: MutableList<Animal> = arrayListOf()
 
     inner class ViewHolder(val binding: ListItemLayoutBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -36,7 +36,7 @@ class ListAdapter(
 
     override fun getItemCount(): Int = filterList.size
 
-    fun addData(list: List<Animal>) {
+    fun addData(list: MutableList<Animal>) {
         dataList.clear()
         dataList.addAll(list)
         filterList = dataList
@@ -48,7 +48,7 @@ class ListAdapter(
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val charString = constraint?.toString() ?: ""
                 if (charString.isEmpty()) filterList = dataList else {
-                    val filteredList = ArrayList<Animal>()
+                    val filteredList = mutableListOf<Animal>()
                     dataList
                         .filter {
                             (it.title.lowercase().contains(constraint!!)) or

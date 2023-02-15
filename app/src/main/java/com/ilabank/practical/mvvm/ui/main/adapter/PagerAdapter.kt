@@ -30,7 +30,7 @@ class PagerAdapter(
 
     override fun getItemCount(): Int = users.size
 
-    fun addData(list: List<Animal>) {
+    fun addData(list: MutableList<Animal>) {
         users.addAll(list)
         notifyDataSetChanged()
     }

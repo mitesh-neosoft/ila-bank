@@ -13,11 +13,12 @@ import com.ilabank.practical.mvvm.ui.main.adapter.PagerAdapter
 import com.ilabank.practical.mvvm.ui.main.viewmodel.MainViewModel
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
+import com.ilabank.practical.mvvm.R
 import com.ilabank.practical.mvvm.data.model.Animal
 import com.ilabank.practical.mvvm.databinding.ActivityMainBinding
+import com.ilabank.practical.mvvm.dpToPx
 
-class MainActivity : BaseActivity<ActivityMainBinding>(),
-    SearchView.OnQueryTextListener {
+class MainActivity : BaseActivity<ActivityMainBinding>(), SearchView.OnQueryTextListener {
 
     override val bindingInflater: (LayoutInflater) -> ActivityMainBinding =
         ActivityMainBinding::inflate
@@ -26,14 +27,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
     private lateinit var pagerAdapter: PagerAdapter
     private lateinit var listAdapter: ListAdapter
 
+    private var pagerList: MutableList<Animal> = mutableListOf()
+    private var imageList: MutableList<Animal> = mutableListOf()
+
     override fun onViewBindingCreated(savedInstanceState: Bundle?) {
-        setupUI()
+        binding.searchView.setOnQueryTextListener(this)
+
+        setUpBannerData()
+        setupListData()
         setupObserver()
     }
 
-    private fun setupUI() {
-        binding.searchView.setOnQueryTextListener(this)
-
+    fun setUpBannerData() {
         pagerAdapter = PagerAdapter(arrayListOf())
         binding.viewPager.adapter = pagerAdapter
         binding.viewPager.offscreenPageLimit = 1
@@ -51,43 +56,46 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         val marginTransformer = MarginPageTransformer(pageMarginPx)
         binding.viewPager.setPageTransformer(marginTransformer)
 
-        TabLayoutMediator(binding.intoTabLayout, binding.viewPager)
-        { tab, position -> }.attach()
+        TabLayoutMediator(binding.intoTabLayout, binding.viewPager) { tab, position -> }.attach()
 
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 binding.searchView.setQuery("", false)
                 binding.searchView.clearFocus()
-                renderAnimalBreedsList(arrayListOf())
-                mainViewModel.fetchAnimalBreeds(pagerAdapter.getData(position))
+                val tabList = mutableListOf<Animal>()
+                imageList.forEach {
+                    if (it.type == pagerList[position].type)
+                        tabList.add(it)
+                }
+                renderAnimalBreedsList(tabList)
             }
         })
 
+    }
+
+    private fun setupListData() {
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         listAdapter = ListAdapter(arrayListOf())
         binding.recyclerView.adapter = listAdapter
     }
 
-    fun Int.dpToPx(displayMetrics: DisplayMetrics): Int = (this * displayMetrics.density).toInt()
-
     private fun setupObserver() {
         mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         mainViewModel.animal.observe(this) {
-            renderAnimalList(it)
+            pagerList = it
+            renderAnimalList(pagerList)
         }
         mainViewModel.animalBreeds.observe(this) {
-            renderAnimalBreedsList(it)
+            imageList = it
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun renderAnimalList(users: List<Animal>) {
+    private fun renderAnimalList(users: MutableList<Animal>) {
         pagerAdapter.addData(users)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun renderAnimalBreedsList(users: List<Animal>) {
+    private fun renderAnimalBreedsList(users: MutableList<Animal>) {
         listAdapter.addData(users)
     }
 

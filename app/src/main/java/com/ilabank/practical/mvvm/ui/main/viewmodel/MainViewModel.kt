@@ -8,14 +8,14 @@ import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
-    private val animalList = ArrayList<Animal>()
-    private val _animal = MutableLiveData<List<Animal>>()
-    val animal: LiveData<List<Animal>>
+    private val animalList = mutableListOf<Animal>()
+    private val _animal = MutableLiveData<MutableList<Animal>>()
+    val animal: LiveData<MutableList<Animal>>
         get() = _animal
 
-    private val animalBreedsList = ArrayList<Animal>()
-    private val _animalBreeds = MutableLiveData<List<Animal>>()
-    val animalBreeds: LiveData<List<Animal>>
+    private val animalBreedsList = mutableListOf<Animal>()
+    private val _animalBreeds = MutableLiveData<MutableList<Animal>>()
+    val animalBreeds: LiveData<MutableList<Animal>>
         get() = _animalBreeds
 
     init {
@@ -24,42 +24,22 @@ class MainViewModel : ViewModel() {
 
     private fun fetchAnimals() {
         viewModelScope.launch {
-            animalList.add(Animal("Dog", R.drawable.dog))
-            animalList.add(Animal("Cat", R.drawable.cat))
-            animalList.add(Animal("Horse", R.drawable.horse))
-            animalList.add(Animal("Lion", R.drawable.download))
-            animalList.add(Animal("Tiger", R.drawable.tiger))
+            animalList.add(Animal("Dog", R.drawable.dog, 1))
+            animalList.add(Animal("Cat", R.drawable.cat, 2))
+            animalList.add(Animal("Horse", R.drawable.horse, 3))
+            animalList.add(Animal("Lion", R.drawable.download, 4))
+            animalList.add(Animal("Tiger", R.drawable.tiger, 5))
             _animal.postValue(animalList)
+        }
+        animalList.forEach {
+            fetchAnimalBreeds(it)
         }
     }
 
-    fun fetchAnimalBreeds(animal: String) {
+    fun fetchAnimalBreeds(data: Animal) {
         viewModelScope.launch {
-            animalBreedsList.clear()
-            if (TextUtils.equals(animal, "Dog")) {
-                for (i in 0..19) {
-                    animalBreedsList.add(Animal("Dog ${i.plus(1)}", R.drawable.dog))
-                }
-            }
-            if (TextUtils.equals(animal, "Cat")) {
-                for (i in 0..19) {
-                    animalBreedsList.add(Animal("Cat ${i.plus(1)}", R.drawable.cat))
-                }
-            }
-            if (TextUtils.equals(animal, "Horse")) {
-                for (i in 0..19) {
-                    animalBreedsList.add(Animal("Horse ${i.plus(1)}", R.drawable.horse))
-                }
-            }
-            if (TextUtils.equals(animal, "Lion")) {
-                for (i in 0..19) {
-                    animalBreedsList.add(Animal("Lion ${i.plus(1)}", R.drawable.download))
-                }
-            }
-            if (TextUtils.equals(animal, "Tiger")) {
-                for (i in 0 until 19) {
-                    animalBreedsList.add(Animal("Tiger ${i.plus(1)}", R.drawable.tiger))
-                }
+            for (i in 1..20) {
+                animalBreedsList.add(Animal("${data.title} $i", data.image, data.type))
             }
             _animalBreeds.postValue(animalBreedsList)
         }
